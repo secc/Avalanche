@@ -32,6 +32,7 @@ namespace RockWeb.Plugins.Avalanche
     [Description( "Allows the user to update their personal information" )]
 
     [LinkedPage( "Next Page", "Page to forward to after completion." )]
+    [DefinedValueField( Rock.SystemGuid.DefinedType.PERSON_CONNECTION_STATUS, "Connection Status", "Connection status which new people will be assigned." )]
     public partial class PersonProfileEdit : AvalancheBlock
     {
         /// <summary>
@@ -57,7 +58,20 @@ namespace RockWeb.Plugins.Avalanche
 
             if ( parameter == "0" )
             {
-                person = new Person();
+                person = new Person
+                {
+                    //Set the person to be a person
+                    RecordTypeValueId = DefinedValueCache.Get( Rock.SystemGuid.DefinedValue.PERSON_RECORD_TYPE_PERSON.AsGuid() ).Id,
+                    //set the record status to same as current person
+                    RecordStatusValue = CurrentPerson.RecordStatusValue
+                };
+
+                //set connection status to whatever is configured
+                var connectionStatus = GetAttributeValue( "ConnectionStatus" );
+                if ( !string.IsNullOrWhiteSpace( connectionStatus ) )
+                {
+                    person.ConnectionStatusValueId = DefinedValueCache.Get( connectionStatus.AsGuid() ).Id;
+                }
             }
             else
             {
