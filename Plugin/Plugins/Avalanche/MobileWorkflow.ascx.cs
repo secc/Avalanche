@@ -1,26 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
+using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-
+using Avalanche;
+using Avalanche.Field;
+using Avalanche.Models;
+using Newtonsoft.Json;
 using Rock;
 using Rock.Attribute;
 using Rock.Data;
 using Rock.Model;
-using Rock.Web.Cache;
-using Rock.Web.UI;
-using Rock.Web.UI.Controls;
 using Rock.Security;
-using Rock.Workflow;
-using Avalanche;
-using Avalanche.Models;
-using Avalanche.Field;
-using Newtonsoft.Json;
-using Rock.Field.Types;
-using System.Web;
+using Rock.Web.Cache;
+using Rock.Web.UI.Controls;
 
 namespace RockWeb.Plugins.Avalanche
 {
@@ -79,7 +74,7 @@ namespace RockWeb.Plugins.Avalanche
             var h = HttpContext.Current.Response.Headers;
             var b = h.GetValues( "ActionTypes" );
 
-            if ( HydrateObjects() )
+            if ( HydrateObjects( parameter ) )
             {
                 List<FormElementItem> elements = BuildForm( true );
                 CustomAttributes.Add( "FormElementItems", JsonConvert.SerializeObject( elements ) );
@@ -99,7 +94,7 @@ namespace RockWeb.Plugins.Avalanche
 
         #region Methods
 
-        private bool HydrateObjects()
+        private bool HydrateObjects( string parameter = "" )
         {
             LoadWorkflowType();
 
@@ -126,19 +121,15 @@ namespace RockWeb.Plugins.Avalanche
             // If operating against an existing workflow, get the workflow and load attributes
             if ( !WorkflowId.HasValue )
             {
-                WorkflowId = parameter.AsIntegerOrNull();
-                if ( !WorkflowId.HasValue )
+                Guid guid = parameter.AsGuid();
+                if ( !guid.IsEmpty() )
                 {
-                    Guid guid = parameter.AsGuid();
-                    if ( !guid.IsEmpty() )
+                    _workflow = _workflowService.Queryable()
+                        .Where( w => w.Guid.Equals( guid ) && w.WorkflowTypeId == _workflowType.Id )
+                        .FirstOrDefault();
+                    if ( _workflow != null )
                     {
-                        _workflow = _workflowService.Queryable()
-                            .Where( w => w.Guid.Equals( guid ) && w.WorkflowTypeId == _workflowType.Id )
-                            .FirstOrDefault();
-                        if ( _workflow != null )
-                        {
-                            WorkflowId = _workflow.Id;
-                        }
+                        WorkflowId = _workflow.Id;
                     }
                 }
             }
@@ -159,7 +150,6 @@ namespace RockWeb.Plugins.Avalanche
                         activity.LoadAttributes();
                     }
                 }
-
             }
 
             // If an existing workflow was not specified, activate a new instance of workflow and start processing
@@ -171,6 +161,10 @@ namespace RockWeb.Plugins.Avalanche
                 _workflow = Rock.Model.Workflow.Activate( _workflowType, workflowName );
                 if ( _workflow != null )
                 {
+                    if ( _workflow.Attributes.ContainsKey( "Parameter" ) )
+                    {
+                        _workflow.SetAttributeValue( "Parameter", parameter );
+                    }
                     // If a PersonId or GroupId parameter was included, load the corresponding
                     // object and pass that to the actions for processing
                     object entity = null;
@@ -256,8 +250,6 @@ namespace RockWeb.Plugins.Avalanche
             return false;
         }
 
-
-
         private void LoadWorkflowType()
         {
             if ( _rockContext == null )
@@ -277,7 +269,7 @@ namespace RockWeb.Plugins.Avalanche
                 Guid workflowTypeguid = GetAttributeValue( "WorkflowType" ).AsGuid();
                 if ( !workflowTypeguid.IsEmpty() )
                 {
-                    _workflowType = WorkflowTypeCache.Read( workflowTypeguid );
+                    _workflowType = WorkflowTypeCache.Get( workflowTypeguid );
                 }
 
                 // If an attribute value was not provided, check for query/route value
@@ -290,7 +282,7 @@ namespace RockWeb.Plugins.Avalanche
             // Get the workflow type 
             if ( _workflowType == null && WorkflowTypeId.HasValue )
             {
-                _workflowType = WorkflowTypeCache.Read( WorkflowTypeId.Value );
+                _workflowType = WorkflowTypeCache.Get( WorkflowTypeId.Value );
             }
         }
 
@@ -317,7 +309,7 @@ namespace RockWeb.Plugins.Avalanche
             {
                 if ( formAttribute.IsVisible )
                 {
-                    var attribute = AttributeCache.Read( formAttribute.AttributeId );
+                    var attribute = AttributeCache.Get( formAttribute.AttributeId );
                     if ( attribute == null )
                     {
                         continue;
@@ -465,11 +457,12 @@ namespace RockWeb.Plugins.Avalanche
                         {
                             responseText = actionDetails[3].ResolveMergeFields( mergeFields );
                         }
+                        _action.MarkComplete();
+                        _rockContext.SaveChanges();
                         break;
                     }
                 }
 
-                _action.MarkComplete();
                 _action.FormAction = request;
                 _action.AddLogEntry( "Form Action Selected: " + _action.FormAction );
 
@@ -480,7 +473,7 @@ namespace RockWeb.Plugins.Avalanche
 
                 if ( _actionType.WorkflowForm.ActionAttributeGuid.HasValue )
                 {
-                    var attribute = AttributeCache.Read( _actionType.WorkflowForm.ActionAttributeGuid.Value );
+                    var attribute = AttributeCache.Get( _actionType.WorkflowForm.ActionAttributeGuid.Value );
                     if ( attribute != null )
                     {
                         IHasAttributes item = null;
@@ -560,7 +553,6 @@ namespace RockWeb.Plugins.Avalanche
                 }
             }
 
-
             return new MobileBlockResponse()
             {
                 Request = request,
@@ -580,7 +572,7 @@ namespace RockWeb.Plugins.Avalanche
                 {
                     if ( formAttribute.IsVisible && !formAttribute.IsReadOnly )
                     {
-                        var attribute = AttributeCache.Read( formAttribute.AttributeId );
+                        var attribute = AttributeCache.Get( formAttribute.AttributeId );
 
                         if ( attribute != null && body.ContainsKey( attribute.Key ) )
                         {

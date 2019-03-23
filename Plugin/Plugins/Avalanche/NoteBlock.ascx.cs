@@ -13,22 +13,16 @@
 // </copyright>
 //
 using System;
-using System.ComponentModel;
-using Rock.Model;
-using Rock.Security;
-using System.Web.UI;
-using Rock.Web.Cache;
-using Rock.Web.UI;
-using System.Web;
-using Rock.Data;
-using System.Linq;
 using System.Collections.Generic;
-using Rock;
-using Avalanche;
+using System.ComponentModel;
+using System.Linq;
 using Avalanche.Models;
-using Rock.Attribute;
-using Avalanche.Attribute;
 using Newtonsoft.Json;
+using Rock;
+using Rock.Attribute;
+using Rock.Data;
+using Rock.Model;
+using Rock.Web.Cache;
 
 namespace RockWeb.Plugins.Avalanche
 {
@@ -114,6 +108,8 @@ namespace RockWeb.Plugins.Avalanche
                 Type = FormElementType.Editor,
                 Key = "note",
                 Value = note.Text,
+                Keyboard = Keyboard.Telephone,
+                Required = true
             };
             form.Add( editor );
 

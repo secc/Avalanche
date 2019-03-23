@@ -14,20 +14,12 @@
 //
 using System;
 using System.ComponentModel;
-using Rock.Model;
-using Rock.Security;
-using System.Web.UI;
-using Rock.Web.Cache;
-using Rock.Web.UI;
-using System.Web;
-using Rock.Data;
-using System.Linq;
-using System.Collections.Generic;
-using Rock;
 using Avalanche;
+using Avalanche.Attribute;
+using Avalanche.ExpressBlocks;
 using Avalanche.Models;
 using Rock.Attribute;
-using Avalanche.Attribute;
+using Rock.Model;
 
 namespace RockWeb.Plugins.Avalanche
 {
@@ -38,12 +30,13 @@ namespace RockWeb.Plugins.Avalanche
     [ActionItemField( "Action Item", "", false )]
     [TextField( "Text", "The text of the label to be displayed. Lava enabled with the {{parameter}} available.", false )]
     [LavaCommandsField( "Enabled Lava Commands", "The Lava commands that should be enabled for this block.", false )]
-    public partial class ButtonBlock : AvalancheBlock
+    public partial class ButtonBlock : AvalancheBlock, IExpress
     {
-        /// <summary>
-        /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
-        /// </summarysni>
-        /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
+        public Type GetExpressType()
+        {
+            return typeof( ButtonExpressBlock );
+        }
+
         protected override void OnLoad( EventArgs e )
         {
             btnButton.Text = GetAttributeValue( "Text" );
@@ -52,23 +45,7 @@ namespace RockWeb.Plugins.Avalanche
         public override MobileBlock GetMobile( string parameter )
         {
 
-            CustomAttributes.Add( "Text", AvalancheUtilities.ProcessLava( GetAttributeValue( "Text" ),
-                                                                          CurrentPerson,
-                                                                          parameter,
-                                                                          GetAttributeValue( "EnabledLavaCommands" ) ) );
-
-            AvalancheUtilities.SetActionItems( GetAttributeValue( "ActionItem" ),
-                                   CustomAttributes,
-                                   CurrentPerson, AvalancheUtilities.GetMergeFields( CurrentPerson ),
-                                   GetAttributeValue( "EnabledLavaCommands" ),
-                                   parameter );
-
-
-            return new MobileBlock()
-            {
-                BlockType = "Avalanche.Blocks.ButtonBlock",
-                Attributes = CustomAttributes
-            };
+            throw new NotImplementedException();
         }
 
         protected void btnButton_Click( object sender, EventArgs e )

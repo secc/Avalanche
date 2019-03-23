@@ -1,4 +1,4 @@
-// <copyright>
+﻿// <copyright>
 // Copyright Southeast Christian Church
 //
 // Licensed under the  Southeast Christian Church License (the "License");
@@ -15,14 +15,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using Avalanche.Components;
 using Rock;
-using Rock.Attribute;
 using Rock.Data;
 using Rock.Model;
 using Rock.Web.Cache;
-using System.Linq;
-using org.secc.OAuth.Model;
-using org.secc.OAuth.Data;
 
 namespace RockWeb.Plugins.Avalanche
 {
@@ -32,7 +30,6 @@ namespace RockWeb.Plugins.Avalanche
     [DisplayName( "Avalanche Configuration" )]
     [Category( "Avalanche > Settings" )]
     [Description( "Configuration settings for Avalanche." )]
-
     public partial class AvalancheConfiguration : Rock.Web.UI.RockBlock
     {
 
@@ -40,64 +37,122 @@ namespace RockWeb.Plugins.Avalanche
         {
             if ( !Page.IsPostBack )
             {
-                RockContext rockContext = new RockContext();
-                AttributeValueService attributeService = new AttributeValueService( rockContext );
-                var homePageAttributeCache = GlobalAttributesCache.Read( rockContext ).Attributes.Where( a => a.Key == "AvalancheHomePage" ).FirstOrDefault();
-                var homePageAttribue = attributeService.GetByAttributeIdAndEntityId( homePageAttributeCache.Id, null );
-                if ( homePageAttribue != null )
-                {
-                    var homePageAttribueValue = homePageAttribue.Value;
-                    ppHome.SetValue( homePageAttribueValue.AsInteger() );
-                }
-
-                var menuPageAttributeCache = GlobalAttributesCache.Read( rockContext ).Attributes.Where( a => a.Key == "AvalancheMenuPage" ).FirstOrDefault();
-                var menuPageAttribute = attributeService.GetByAttributeIdAndEntityId( menuPageAttributeCache.Id, null );
-                if ( menuPageAttribute != null )
-                {
-                    var menupageAttributeValue = menuPageAttribute.Value;
-                    ppMenu.SetValue( menupageAttributeValue.AsInteger() );
-                }
+                BindData();
             }
+        }
+
+        private void BindData()
+        {
+            var avalancheComponent = new AvalancheComponent();
+            ppHome.SetValue( avalancheComponent.HomePageId );
+            ppFooter.SetValue( avalancheComponent.FooterPageId );
+            kvAttributes.CustomKeys = new System.Collections.Generic.Dictionary<string, string> { { "PreloadImages", "PreloadImages" } };
+            kvAttributes.Value = avalancheComponent.AppAttributes;
+            lPerson.Text = string.Join( ", ", GetPersonAttributes( avalancheComponent ).Select( gt => gt.Name ) );
+            lGroupTypes.Text = string.Join( ", ", GetGroupTypes( avalancheComponent ).Select( gt => gt.Name ) );
+            lGroups.Text = string.Join( ", ", GetGroups( avalancheComponent ).Select( g => g.Name ) );
+        }
+
+        private List<AttributeCache> GetPersonAttributes( AvalancheComponent avalancheComponent )
+        {
+            var aIds = avalancheComponent.PersonAttributes.Split( new[] { ',' }, StringSplitOptions.RemoveEmptyEntries );
+            var output = new List<AttributeCache>();
+            foreach ( var id in aIds )
+            {
+                output.Add( AttributeCache.Get( id.AsInteger() ) );
+            }
+            return output;
+        }
+
+        private List<GroupTypeCache> GetGroupTypes( AvalancheComponent avalancheComponent )
+        {
+            var gtIds = avalancheComponent.MemberGroupTypes.Split( new[] { ',' }, StringSplitOptions.RemoveEmptyEntries );
+            var output = new List<GroupTypeCache>();
+            foreach ( var id in gtIds )
+            {
+                output.Add( GroupTypeCache.Get( id.AsInteger() ) );
+            }
+            return output;
+        }
+
+        private List<Group> GetGroups( AvalancheComponent avalancheComponent )
+        {
+            var groupids = avalancheComponent.MemberGroups.Split( ',' ).Select( s => s.AsInteger() ).ToList();
+            RockContext rockContext = new RockContext();
+            GroupService groupService = new GroupService( rockContext );
+            return groupService.GetByIds( groupids ).ToList();
         }
 
         protected void btnSave_Click( object sender, EventArgs e )
         {
-            RockContext rockContext = new RockContext();
-            AttributeValueService attributeValueService = new AttributeValueService( rockContext );
+            var avalancheComponents = new AvalancheComponent();
 
-            var homePageAttributeCache = GlobalAttributesCache.Read( rockContext ).Attributes.Where( a => a.Key == "AvalancheHomePage" ).FirstOrDefault();
-            var homePageAttribute = attributeValueService.GetByAttributeIdAndEntityId( homePageAttributeCache.Id, null );
-            if ( homePageAttribute == null )
-            {
-                homePageAttribute = new AttributeValue()
-                {
-                    AttributeId = homePageAttributeCache.Id
-                };
-                attributeValueService.Add( homePageAttribute );
-            }
-
-            homePageAttribute.Value = ppHome.SelectedValue;
-
-
-            var menuPageAttributeCache = GlobalAttributesCache.Read( rockContext ).Attributes.Where( a => a.Key == "AvalancheMenuPage" ).FirstOrDefault();
-            var menuPageAttribute = attributeValueService.GetByAttributeIdAndEntityId( menuPageAttributeCache.Id, null );
-            if ( menuPageAttribute == null )
-            {
-                menuPageAttribute = new AttributeValue()
-                {
-                    AttributeId = menuPageAttributeCache.Id
-                };
-                attributeValueService.Add( menuPageAttribute );
-            }
-            menuPageAttribute.Value = ppMenu.SelectedValue;
-
-            rockContext.SaveChanges();
+            avalancheComponents.HomePageId = ppHome.SelectedValue.AsInteger();
+            avalancheComponents.FooterPageId = ppFooter.SelectedValue.AsInteger();
+            avalancheComponents.AppAttributes = kvAttributes.Value;
             NavigateToParentPage();
         }
 
         protected void btnBack_Click( object sender, EventArgs e )
         {
             NavigateToParentPage();
+        }
+
+        protected void btnGroupTypes_Click( object sender, EventArgs e )
+        {
+            gtpGroupTypes.SetGroupTypes( GroupTypeCache.All() );
+            gtpGroupTypes.SetValues( new AvalancheComponent().MemberGroupTypes.Split( ',' ) );
+            mdGroupTypes.Show();
+        }
+
+        protected void mdGroupTypes_SaveClick( object sender, EventArgs e )
+        {
+            var avalancheComponent = new AvalancheComponent();
+            avalancheComponent.MemberGroupTypes = string.Join( ",", gtpGroupTypes.SelectedValues );
+            mdGroupTypes.Hide();
+            BindData();
+        }
+
+        protected void btnGroups_Click( object sender, EventArgs e )
+        {
+            var securityGroupType = GroupTypeCache.Get( Rock.SystemGuid.GroupType.GROUPTYPE_SECURITY_ROLE ).Id;
+            RockContext rockContext = new RockContext();
+            GroupService groupService = new GroupService( rockContext );
+            var groupIds = new AvalancheComponent().MemberGroups.Split( ',' ).Select( i => i.AsInteger() ).ToList();
+            var groups = groupService.GetByIds( groupIds ).ToList();
+            gpGroups.SetValues( groups.Where( g => g.GroupTypeId != securityGroupType ) );
+            gtpSecurity.DataSource = groupService.Queryable().Where( g => g.GroupTypeId == securityGroupType ).ToList();
+            gtpSecurity.DataBind();
+            gtpSecurity.SetValues( groups.Where( g => g.GroupTypeId == securityGroupType ).Select( g => g.Id.ToString() ) );
+            mdGroups.Show();
+        }
+
+        protected void mdGroups_SaveClick( object sender, EventArgs e )
+        {
+            var avalancheComponent = new AvalancheComponent();
+            var groupIds = gpGroups.SelectedValues.ToList();
+            groupIds.AddRange( gtpSecurity.SelectedValues );
+            avalancheComponent.MemberGroups = string.Join( ",", groupIds );
+            mdGroups.Hide();
+            BindData();
+        }
+
+        protected void btnPerson_Click( object sender, EventArgs e )
+        {
+            var personEntityId = EntityTypeCache.Get( typeof( Person ) ).Id;
+            var attributes = AttributeCache.All().Where( a => a.EntityTypeId == personEntityId );
+            cblPerson.DataSource = attributes;
+            cblPerson.DataBind();
+            cblPerson.SetValues( new AvalancheComponent().PersonAttributes.Split( ',' ).Select( i => i.AsInteger() ) );
+            mdPerson.Show();
+        }
+
+        protected void mdPerson_SaveClick( object sender, EventArgs e )
+        {
+            var avalanceComponent = new AvalancheComponent();
+            avalanceComponent.PersonAttributes = string.Join( ",", cblPerson.SelectedValues );
+            mdPerson.Hide();
+            BindData();
         }
     }
 }

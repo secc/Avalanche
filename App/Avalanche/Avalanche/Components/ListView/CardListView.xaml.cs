@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalanche.CustomControls;
 using Avalanche.Models;
 using FFImageLoading.Forms;
@@ -30,7 +31,6 @@ namespace Avalanche.Components.ListView
     [XamlCompilation( XamlCompilationOptions.Compile )]
     public partial class CardListView : ContentView, IListViewComponent
     {
-
         private double _columns = 2;
         public double Columns
         {
@@ -231,6 +231,18 @@ namespace Avalanche.Components.ListView
                     };
             sl.GestureRecognizers.Add( tgr );
             gGrid.Children.Add( frame, x, y );
+            frame.Opacity = 0;
+            FadeIn( frame, y * 500 );
+        }
+
+        private async void FadeIn( View view, int delay )
+        {
+            await Task.Delay( delay );
+            Device.BeginInvokeOnMainThread( () =>
+            {
+                view.FadeTo( 1, 1000 );
+            } );
+
         }
     }
 }

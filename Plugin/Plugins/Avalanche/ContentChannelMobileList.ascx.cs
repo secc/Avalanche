@@ -254,7 +254,7 @@ namespace RockWeb.Plugins.Avalanche
             SetAttributeValue( "TitleLava", tbTitleLava.Text );
             SetAttributeValue( "IconLava", tbIconLava.Text );
             SetAttributeValue( "ImageLava", tbImageLava.Text );
-            SetAttributeValue( "SubtitleLava", tbSubtitleLava.Text );
+            SetAttributeValue( "DescriptionLava", tbSubtitleLava.Text );
             SetAttributeValue( "OrderLava", tbOrder.Text );
 
             var ppFieldType = new PageReferenceFieldType();
@@ -380,7 +380,7 @@ $(document).ready(function() {
             tbTitleLava.Text = GetAttributeValue( "TitleLava" );
             tbIconLava.Text = GetAttributeValue( "IconLava" );
             tbImageLava.Text = GetAttributeValue( "ImageLava" );
-            tbSubtitleLava.Text = GetAttributeValue( "SubtitleLava" );
+            tbSubtitleLava.Text = GetAttributeValue( "DescriptionLava" );
             tbOrder.Text = GetAttributeValue( "OrderLava" );
 
             var ppFieldType = new PageReferenceFieldType();

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Avalanche.Models
 {
@@ -11,6 +7,6 @@ namespace Avalanche.Models
         public MobilePage Header { get; set; }
         public MobilePage Footer { get; set; }
         public MobilePage Page { get; set; }
-        public Dictionary<string,string> Attributes { get; set; }
+        public Dictionary<string, string> Attributes { get; set; }
     }
 }

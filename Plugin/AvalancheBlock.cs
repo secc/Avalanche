@@ -15,10 +15,8 @@
 //
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using Avalanche.Models;
 using Rock;
@@ -57,7 +55,7 @@ namespace Avalanche
             {
                 Request = request,
                 Response = "",
-                TTL = 0
+                CacheDuration = 0
             };
         }
 
@@ -102,7 +100,6 @@ namespace Avalanche
                     ShowDetails();
                     btnDetails.Text = "Hide Details";
                 }
-
             }
             else
             {

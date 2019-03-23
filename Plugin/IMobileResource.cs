@@ -19,7 +19,7 @@ namespace Avalanche
 {
     public interface IMobileResource
     {
-        MobileBlock GetMobile(string parameter);
+        MobileBlock GetMobile( string parameter );
         MobileBlockResponse HandleRequest( string request, Dictionary<string, string> Body );
     }
 }

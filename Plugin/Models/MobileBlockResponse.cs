@@ -12,6 +12,8 @@
 // limitations under the License.
 // </copyright>
 //
+using System;
+
 namespace Avalanche.Models
 {
     public class MobileBlockResponse
@@ -19,10 +21,12 @@ namespace Avalanche.Models
         public MobileBlockResponse()
         {
             Response = "";
-            TTL = 0;
+            CacheDuration = 0;
         }
         public string Request { get; set; }
         public string Response { get; set; }
-        public int TTL { get; set; }
+        public int CacheDuration { get; set; }
+        [Obsolete( "Use CacheDuration instead" )]
+        public int TTL { get => CacheDuration; set => CacheDuration = value; }
     }
 }

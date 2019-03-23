@@ -15,8 +15,8 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Rock;
 using Rock.Data;
@@ -109,12 +109,11 @@ namespace Avalanche
 
         public static string GetLayout( string layoutName )
         {
-            var definedType = DefinedTypeCache.Read( LayoutsDefinedType.AsGuid() );
+            var definedType = DefinedTypeCache.Get( LayoutsDefinedType.AsGuid() );
             var value = definedType.DefinedValues.Where( d => d.Value.Replace( " ", "" ).ToLower() == layoutName.Replace( " ", "" ).ToLower() ).FirstOrDefault();
             var content = value.GetAttributeValue( "Content" );
             return content;
         }
-
 
         public static PersonalDevice GetPersonalDevice( string deviceId, int? PersonAliasId, RockContext rockContext )
         {
@@ -140,10 +139,41 @@ namespace Avalanche
             {
                 PersonAliasId = PersonAliasId,
                 DeviceUniqueIdentifier = deviceId,
-                PersonalDeviceTypeValueId = DefinedValueCache.Read( Rock.SystemGuid.DefinedValue.PERSONAL_DEVICE_TYPE_MOBILE.AsGuid() ).Id
+                PersonalDeviceTypeValueId = DefinedValueCache.Get( Rock.SystemGuid.DefinedValue.PERSONAL_DEVICE_TYPE_MOBILE.AsGuid() ).Id
             };
             personalDeviceService.Add( device );
             rockContext.SaveChanges();
+            return device;
+        }
+
+        public static async Task<PersonalDevice> GetPersonalDeviceAsync( string deviceId, int? PersonAliasId, RockContext rockContext )
+        {
+            if ( string.IsNullOrWhiteSpace( deviceId ) )
+            {
+                return null;
+            }
+
+            PersonalDeviceService personalDeviceService = new PersonalDeviceService( rockContext );
+            var device = await personalDeviceService.Queryable().FirstOrDefaultAsync( d => d.DeviceUniqueIdentifier == deviceId );
+            if ( device != null )
+            {
+                if ( device.PersonAliasId == PersonAliasId )
+                {
+                    return device;
+                }
+                device.PersonAliasId = PersonAliasId;
+                await rockContext.SaveChangesAsync();
+                return device;
+            }
+
+            device = new PersonalDevice()
+            {
+                PersonAliasId = PersonAliasId,
+                DeviceUniqueIdentifier = deviceId,
+                PersonalDeviceTypeValueId = DefinedValueCache.Get( Rock.SystemGuid.DefinedValue.PERSONAL_DEVICE_TYPE_MOBILE.AsGuid() ).Id
+            };
+            personalDeviceService.Add( device );
+            await rockContext.SaveChangesAsync();
             return device;
         }
     }

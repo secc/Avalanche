@@ -253,7 +253,8 @@ namespace Avalanche.Components.ListView
                 };
             sl.GestureRecognizers.Add( tgr );
             gGrid.Children.Add( sl, x, y );
+            sl.Opacity = 0;
+            sl.FadeTo( 1 );
         }
-        
     }
 }

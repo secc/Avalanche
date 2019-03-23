@@ -14,19 +14,10 @@
 //
 using System;
 using System.ComponentModel;
-using Rock.Model;
-using Rock.Security;
-using System.Web.UI;
-using Rock.Web.Cache;
-using Rock.Web.UI;
-using System.Web;
-using Rock.Data;
-using System.Linq;
-using System.Collections.Generic;
-using Rock;
 using Avalanche;
 using Avalanche.Models;
-using Rock.Attribute;
+using Avalanche.ExpressBlocks;
+using Rock.Model;
 
 namespace RockWeb.Plugins.Avalanche
 {
@@ -34,24 +25,22 @@ namespace RockWeb.Plugins.Avalanche
     [Category( "Avalanche" )]
     [Description( "Login Screen" )]
 
-    public partial class Login : AvalancheBlock
+    public partial class Login : AvalancheBlock, IExpress
     {
+        public Type GetExpressType()
+        {
+            return typeof( LoginExpressBlock );
+        }
 
-        /// <summary>
-        /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
-        /// </summarysni>
-        /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
         protected override void OnLoad( EventArgs e )
         {
         }
 
         public override MobileBlock GetMobile( string parameter )
         {
-            return new MobileBlock()
-            {
-                BlockType = "Avalanche.Blocks.Login",
-                Attributes = CustomAttributes
-            };
+            throw new NotImplementedException();
         }
+
+
     }
 }

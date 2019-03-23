@@ -14,20 +14,13 @@
 //
 using System;
 using System.ComponentModel;
-using Rock.Model;
-using Rock.Security;
-using System.Web.UI;
-using Rock.Web.Cache;
-using Rock.Web.UI;
-using System.Web;
-using Rock.Data;
-using System.Linq;
-using System.Collections.Generic;
-using Rock;
 using Avalanche;
-using Avalanche.Models;
-using Rock.Attribute;
 using Avalanche.Attribute;
+using Avalanche.ExpressBlocks;
+using Avalanche.Models;
+using Rock;
+using Rock.Attribute;
+using Rock.Model;
 
 namespace RockWeb.Plugins.Avalanche
 {
@@ -38,8 +31,18 @@ namespace RockWeb.Plugins.Avalanche
     [LavaCommandsField( "Enabled Lava Commands", "The Lava commands that should be enabled for this block.", false )]
     [ActionItemField( "Action Item", "", false )]
     [TextField( "Text", "The text of the label to be displayed.", false )]
-    public partial class LabelBlock : AvalancheBlock
+    public partial class LabelBlock : AvalancheBlock, IExpress
     {
+
+        public Type GetExpressType()
+        {
+            return typeof( LabelExpressBlock );
+        }
+
+        public override MobileBlock GetMobile( string parameter )
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
@@ -57,26 +60,6 @@ namespace RockWeb.Plugins.Avalanche
             {
                 lbLabel.Style.Add( "color", GetAttributeValue( "TextColor" ) );
             }
-        }
-
-        public override MobileBlock GetMobile( string parameter )
-        {
-            AvalancheUtilities.SetActionItems( GetAttributeValue( "ActionItem" ),
-                                               CustomAttributes,
-                                               CurrentPerson, AvalancheUtilities.GetMergeFields( CurrentPerson ),
-                                               GetAttributeValue( "EnabledLavaCommands" ),
-                                               parameter );
-
-            CustomAttributes["Text"] = AvalancheUtilities.ProcessLava( GetAttributeValue( "Text" ),
-                                                                       CurrentPerson,
-                                                                       parameter,
-                                                                       GetAttributeValue( "EnabledLavaCommands" ) );
-
-            return new MobileBlock()
-            {
-                BlockType = "Avalanche.Blocks.LabelBlock",
-                Attributes = CustomAttributes
-            };
         }
     }
 }

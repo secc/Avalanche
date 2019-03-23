@@ -88,7 +88,11 @@
     <Compile Include="AvalancheBlock.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="Components\AvalancheComponent.cs" />
     <Compile Include="Controls\ActionItem.cs" />
+    <Compile Include="ExpressBlocks\ButtonExpressBlock.cs" />
+    <Compile Include="ExpressBlocks\LabelExpressBlock.cs" />
+    <Compile Include="ExpressBlocks\LoginExpressBlock.cs" />
     <Compile Include="Field\Converters\AddressFieldTypeConverter.cs" />
     <Compile Include="Field\Converters\CampusFieldTypeConverter.cs" />
     <Compile Include="Field\Converters\DefinedValueTypeConverter.cs" />
@@ -100,6 +104,7 @@
     <Compile Include="Field\Converters\TextFieldTypeConverter.cs" />
     <Compile Include="Field\FieldTypeExtensions.cs" />
     <Compile Include="Field\Types\ActionItemFieldType.cs" />
+    <Compile Include="IExpress.cs" />
     <Compile Include="IMobileResource.cs" />
     <Compile Include="Lava\CustomFilters.cs" />
     <Compile Include="Migrations\005AppAttributes.cs" />
@@ -107,18 +112,24 @@
     <Compile Include="Migrations\002Interactions.cs" />
     <Compile Include="Migrations\001Init.cs" />
     <Compile Include="Migrations\003Layouts.cs" />
+    <Compile Include="Models\ExpressBlock.cs" />
     <Compile Include="Models\FormElementItem.cs" />
     <Compile Include="Models\FormResponse.cs" />
+    <Compile Include="Models\GroupSummary.cs" />
     <Compile Include="Models\HomeRequest.cs" />
     <Compile Include="Models\InteractionInformation.cs" />
     <Compile Include="Models\MobileBlockResponse.cs" />
     <Compile Include="Models\ListViewResponse.cs" />
     <Compile Include="Models\MobileBlock.cs" />
     <Compile Include="Models\ListElement.cs" />
+    <Compile Include="Models\PageInteraction.cs" />
+    <Compile Include="Models\PersonSummary.cs" />
     <Compile Include="Models\RckipidToken.cs" />
     <Compile Include="Models\MobilePage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rest\Controllers\AvalancheController.Partial.cs" />
+    <Compile Include="Rest\Helpers\BrowserJsonFormatter.cs" />
+    <Compile Include="Rest\Helpers\CachedOkResult.cs" />
     <Compile Include="Startup\LoadCustomFilters.cs" />
     <Compile Include="Startup\LoadFieldTypeConverters.cs" />
     <Compile Include="Transactions\AppInteractionTransaction.cs" />
