@@ -58,6 +58,15 @@ namespace RockWeb.Plugins.Avalanche
                                                                             parameter,
                                                                             GetAttributeValue( "EnabledLavaCommands" )
                                                                             ) );
+            if ( CustomAttributes["Source"].IsNotNullOrWhiteSpace() )
+            {
+                return new MobileBlock()
+                {
+                    BlockType = "Avalanche.Blocks.Null",
+                    Attributes = CustomAttributes
+                };
+            }
+
             CustomAttributes.Add( "AutoPlay", GetAttributeValue( "AutoPlay" ) );
             CustomAttributes.Add( "AspectRatio", GetAttributeValue( "AspectRatio" ) );
             return new MobileBlock()
