@@ -149,7 +149,9 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /Y /R "$(ProjectDir)bin\Debug\Avalanche.dll" "$(SolutionDir)RockWeb\bin"
+    <PostBuildEvent>xcopy /Y /R /E /I "$(ProjectDir)Plugins" "$(SolutionDir)RockWeb\Plugins\org_secc"
+xcopy /Y /R /E /I "$(ProjectDir)Theme" "$(SolutionDir)RockWeb\Themes"
+xcopy /Y /R "$(ProjectDir)bin\Debug\Avalanche.dll" "$(SolutionDir)RockWeb\bin"
 xcopy /Y /R "$(ProjectDir)bin\Debug\Avalanche.pdb" "$(SolutionDir)RockWeb\bin"
 xcopy /Y /R "$(ProjectDir)bin\Debug\HtmlAgilityPack.dll" "$(SolutionDir)RockWeb\bin"
 xcopy /Y /R "$(ProjectDir)bin\Debug\ReverseMarkdown.dll" "$(SolutionDir)RockWeb\bin"
