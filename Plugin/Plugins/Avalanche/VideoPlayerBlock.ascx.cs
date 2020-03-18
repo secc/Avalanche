@@ -58,7 +58,7 @@ namespace RockWeb.Plugins.Avalanche
                                                                             parameter,
                                                                             GetAttributeValue( "EnabledLavaCommands" )
                                                                             ) );
-            if ( CustomAttributes["Source"].IsNotNullOrWhiteSpace() )
+            if ( !CustomAttributes["Source"].IsNotNullOrWhiteSpace() )
             {
                 return new MobileBlock()
                 {
